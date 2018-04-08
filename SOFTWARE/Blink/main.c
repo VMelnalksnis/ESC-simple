@@ -1,11 +1,10 @@
 /*
- * main.c
+ *	main.c
  *
- * Created: 08.04.2018 14:47:38
- * Author : Valters Melnalksnis
+ *	Created	: 08.04.2018 14:47:38
+ *	Author	: Valters Melnalksnis
+ *	PCB		: V1A
  */
-
-
 
 #include <avr/io.h>
 #include <avr/interrupt.h>
