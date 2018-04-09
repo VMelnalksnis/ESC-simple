@@ -13,6 +13,8 @@
 	* Change 7805 footprint to TO-220
 	* Add 5V LED
 	* Add 2 test LEDs
+	* Add pull-down resistor to control input
+	* Add mounting holes
 
 ### Documentation
 Currently only in SOFTWARE in source.
