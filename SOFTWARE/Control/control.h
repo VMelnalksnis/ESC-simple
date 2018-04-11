@@ -32,16 +32,16 @@
 #define CTRL_PORT		PORTD
 
 /*	Timer1 output compare A value corresponding to the minimum pulse width.	*/
-#define CTRL_MIN		16000
+#define CTRL_MIN		16
 /*	Timer1 output compare A value corresponding to the maximum pulse width.	*/
-#define CTRL_MAX		32000
+#define CTRL_MAX		32
 
-#define CTRL_SCALE		800
+#define CTRL_SCALE		400
 
 /*	Timer0 control register value for setting a pre-scaler of 1024.	*/
-#define TIMER0_PRESC	((1 << CS02) | (0 << CS01) | (1 << CS00))
+#define TIMER0_PRESC	((0 << CS02) | (1 << CS01) | (1 << CS00))
 /*	Timer1 control register value for setting a pre-scaler of 1.	*/
-#define TIMER1_PRESC	((0 << CS12) | (0 << CS11) | (1 << CS10))
+#define TIMER1_PRESC	((1 << CS12) | (0 << CS11) | (1 << CS10))
 
 void InitIO(void);
 void InitTimers(void);

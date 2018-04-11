@@ -16,8 +16,7 @@ volatile uint8_t overflow_counter = 0;
  *	should be toggled. This value is proportional to the width of the last
  *	control signal pulse.
  */
-volatile uint8_t blink_period = 0;
-
+volatile uint8_t blink_period = 16;
 
 int main(void)
 {
@@ -67,17 +66,17 @@ void InitTimers(void)
 	/*	Initialize Timer1 - disable compare output mode, set normal mode of operation,
 		select no clock source.	*/
 	TCCR1A = 0;
-	TCCR1B = 0;
+	TCCR1B = ((1 << CS12) | (0 << CS11) | (1 << CS10));
 	TCCR1C = 0;
 	/*	Set Output Compare A to min pulse width (1ms).	*/
-	OCR1A = CTRL_MIN;
+	//OCR1A = CTRL_MIN;
 	/*	Set Output Compare B to max pulse width (2ms).	*/
-	OCR1B = CTRL_MAX;
+	//OCR1B = CTRL_MAX;
 
 	/*	Initialize Timer0 - disable compare output mode, set normal mode of operation,
 		select clock with a pre-scaler of 1024.	*/
 	TCCR0A = 0;
-	TCCR0B = TIMER0_PRESC;
+	TCCR0B = ((0 << CS02) | (1 << CS01) | (1 << CS00));
 }
 
 /*	Initialize all the used interrupts.
@@ -95,7 +94,7 @@ void InitInterrupts(void)
 	/*	Enable Overflow interrupt for Timer0.	*/
 	TIMSK0 = (1 << TOIE0);
 	/*	Enable output compare interrupts for Timer1.	*/
-	TIMSK1 = (1 << OCIE1B) | (1 << OCIE1A) | (0 << TOIE1);
+	//TIMSK1 = (1 << OCIE1B) | (1 << OCIE1A) | (0 << TOIE1);
 
 	/*	Any logical change on INT0 generates an interrupt request.	*/
 	EICRA = (0 << ISC01) | (1 << ISC00);
@@ -110,6 +109,7 @@ void InitInterrupts(void)
  */
 ISR(TIMER0_OVF_vect)
 {
+	cli();
 	overflow_counter++;
 	
 	if (overflow_counter >= blink_period)
@@ -119,6 +119,7 @@ ISR(TIMER0_OVF_vect)
 		/*	Reset the counter.	*/
 		overflow_counter = 0;
 	}
+	sei();
 }
 
 /*	This is the external interrupt 0 interrupt service routine; runs every time the 
@@ -128,39 +129,32 @@ ISR(TIMER0_OVF_vect)
  */
 ISR(INT0_vect)
 {
+	cli();
 	if ((CTRL_PINS & (1 << CTRL_PIN)) == 1)
 	{
 		/*	Control signals rising edge; start Timer1.	*/
-		TCCR1B = TIMER1_PRESC;
-	}
-	else
-	{
-		/*	Control signals falling edge.	*/
-		if ((TIFR1 & (1 << OCF1A)) == 0)
-		{
-			/*	Timer1 didn't exceed minimum pulse width.
-				Clamp the blink period to the minimum value.	*/
-			blink_period = CTRL_MIN / CTRL_SCALE;
-		}
-		else if ((TIFR1 & (1 << OCF1B)) == 1)
-		{
-			/*	Timer1 exceeded maximum pulse width.
-				Clamp the blink period to the maximum value and clear the Timer1
-				output compare B flag.	*/
-			blink_period = CTRL_MAX / CTRL_SCALE;
-			TIFR1 = (1 << OCF1B);
-		}
-		else
-		{
-			/*	Timer1 is within bounds.
-				Clear the Timer1 output compare A flag.	*/
-			blink_period = (TCNT1 / CTRL_SCALE);
-			TIFR1 = (1 << OCF1A);
-		}
-		
-		/*	Select no clock source for Timer1 to stop it.	*/
-		TCCR1B = 0;
 		/*	Clear Timer1.	*/
 		TCNT1 = 0;
 	}
+	else
+	{
+// 		uint16_t temp = TCNT1;
+// 
+// 		if (temp <= CTRL_MIN)
+// 		{
+// 			temp = CTRL_MIN;
+// 		}
+// 		else if (temp >= CTRL_MAX)
+// 		{
+// 			temp = CTRL_MAX;
+// 		}
+		
+		blink_period = TCNT1;
+
+		if (blink_period == 0)
+		{
+			TEST_PORT |= (1 << TEST_PIN_2);
+		}
+	}
+	sei();
 }
