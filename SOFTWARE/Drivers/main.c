@@ -31,6 +31,8 @@ void InitIO()
 	(1 << PHASE_C) | (1 << SD_C);
 	/*	Initialize the output to LOW, so that all MOSFETs are open.	*/
 	DRIVER_PORT = 0;
+	
+	DDRB = (1 << PINB1) | (1 << PINB2);
 }
 
 void InitTimers()
@@ -53,5 +55,29 @@ void InitInterrupts()
 	
 	/*	Enable Timer0 overflow interrupt.	*/
 	TIMSK0 = (1 << TOIE0);
+	/*	Enable global interrupts.	*/
+	sei();
+}
+
+/*	This is the Timer0 overflow interrupt service routine; runs every time Timer0
+ *	overflows. Each time current_state is either incremented or set to zero if it
+ *	has reached the end of the loop. After current_state has been set, the outputs 
+ *	controlling the half-bridge drivers are set according to current_state.
+ */
+ISR(TIMER0_OVF_vect)
+{
+	if (current_state == 5)
+	{
+		current_state = 0;
+	} 
+	else
+	{
+		current_state++;
+	}
+	
+	DRIVER_PORT = driver_states[current_state];
+	
+	PORTB = (((driver_states[current_state] & (1 << SD_A)) != 0) << PINB1) |
+			(((driver_states[current_state] & (1 << PHASE_A)) != 0) << PINB2);
 }
 
