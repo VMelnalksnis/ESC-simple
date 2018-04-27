@@ -1,7 +1,7 @@
 C	18p		6.3V	2
 C	100n	25V		3
 C	100n	6.3V	4
-C	2n7		25V		1
+C	2n7		6.3V	1
 C	1u		25V		7
 R	10k				8
 R	300				3 LEDiem

@@ -3,7 +3,7 @@
  *
  *	Created	: 08.04.2018 14:47:38
  *	Author	: Valters Melnalksnis
- *	PCB		: V1A
+ *	PCB		: V1A, V2A
  */
 
 #include <avr/io.h>
@@ -18,10 +18,25 @@
 //	-) OC1B		- Timer/Counter1 Output Compare Match B Output
 //	-) SS		- SPI Bus Master Slave select
 
+#define V2A
+
+#ifdef V1A
+
 #define TEST_PIN_1		PINB1
 #define TEST_PIN_2		PINB2
 #define TEST_DDR		DDRB
 #define TEST_PORT		PORTB
+
+#endif
+
+#ifdef V2A
+
+#define TEST_PIN_1		PINC0
+#define TEST_PIN_2		PINC1
+#define TEST_DDR		DDRC
+#define TEST_PORT		PORTC
+
+#endif
 
 char enableLED = 1;
 int counter = 1;
