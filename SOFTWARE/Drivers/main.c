@@ -3,7 +3,7 @@
  *
  *	Created	: 2018-04-11
  *	Author	: Valters Melnalksnis
- *	PCB		: V1A
+ *	PCB		: V1A, V2A
  */
 
 #include "Drivers.h"
@@ -66,14 +66,15 @@ void InitInterrupts()
  */
 ISR(TIMER0_OVF_vect)
 {
-	if (current_state == 5)
-	{
-		current_state = 0;
-	} 
-	else
-	{
-		current_state++;
-	}
+// 	if (current_state == 5)
+// 	{
+// 		current_state = 0;
+// 	} 
+// 	else
+// 	{
+// 		current_state++;
+// 	}
+	current_state = 0;
 	
 	DRIVER_PORT = driver_states[current_state];
 	

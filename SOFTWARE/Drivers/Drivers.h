@@ -3,7 +3,7 @@
  *
  *	Created	: 2018-04-11
  *	Author	: Valters Melnalksnis
- *	PCB		: V1A
+ *	PCB		: V1A, V2A
  */ 
 
 #include <avr/io.h>
@@ -19,7 +19,7 @@
 #define SD_A			PIND5
 #define PHASE_A			PIND6
 
-#define DRIVER_STATE_1	((1 << SD_A) | (1 << PHASE_A) | (1 << SD_B))
+#define DRIVER_STATE_1	((1 << SD_A) | (1 << PHASE_A) | (1 << SD_B) | (1 << SD_C))
 #define DRIVER_STATE_2	((1 << SD_A) | (1 << PHASE_A) | (1 << SD_C))
 #define DRIVER_STATE_3	((1 << SD_B) | (1 << PHASE_B) | (1 << SD_C))
 #define DRIVER_STATE_4	((1 << SD_B) | (1 << PHASE_B) | (1 << SD_A))
