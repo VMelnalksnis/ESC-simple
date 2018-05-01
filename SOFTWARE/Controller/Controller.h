@@ -5,8 +5,40 @@
  *  Author: Valters Melnalksnis
  */
 
+/*	Pin map V2A
+ *	12	PB0		ICP		IN	Control signal
+ *	13	PB1		PCINT0	IN	Zero crossing Phase B (ZC_B)
+ *	14	PB2		-		-	N/C
+ *	15	PB3		MOSI	-	ISP
+ *	16	PB4		MISO	-	ISP
+ *	17	PB5		SCK		-	ISP
+ *	7	PB6		XTAL1	-	Crystal
+ *	8	PB7		XTAL2	-	Crystal
+ *
+ *	23	PC0		-		OUT	Test/status LED 1
+ *	24	PC1		-		OUT	Test/status LED 2
+ *	25	PC2		-		-	N/C
+ *	26	PC3		PCINT11	IN	Zero crossing Phase C (ZC_C)
+ *	27	PC4		-		-	N/C
+ *	28	PC5		-		-	N/C
+ *	29	PC6		RESET	-	ISP
+ *
+ *	30	PD0		-		OUT	Shutdown signal Phase C (SD_C)
+ *	31	PD1		-		OUT	Phase signal Phase C (PHASE_C)
+ *	32	PD2		-		-	N/C
+ *	1	PD3		-		OUT	Shutdown signal Phase B (SD_B)
+ *	2	PD4		-		OUT	Phase signal Phase B (PHASE_B)
+ *	9	PD5		-		OUT Shutdown signal Phase A (SD_A)
+ *	10	PD6		-		OUT	Phase signal Phase A (PHASE_A)
+ *	11	PD7		PCINT23	IN	Zero crossing Phase A (ZC_A)
+ *
+ *	19	ADC6	-		-	N/C
+ *	22	ADC7	ADC		IN	Current measurement
+ */
+
 #include <avr/io.h>
 #include <avr/interrupt.h>
+#include <util/delay.h>
 
 /*	Pins connected to LEDs used for testing and status indication.	*/
 #define TEST_PIN_1		PINC0
@@ -65,6 +97,14 @@
 #define ZC_C_PIN		PINC3
 #define ZC_C_INT		PCINT11
 
+/*	Minimum control signal pulse width (1ms).	*/
+#define CTRL_WIDTH_MIN	16000
+/*	Maximum control signal pulse width (2ms).	*/
+#define CTRL_WIDTH_MAX	32000
+
 /*	Array containing driver commutation states in order.	*/
 extern const uint8_t driver_states_on[6];
 extern const uint8_t driver_states_off[6];
+
+void InitIO(void);
+void BlindStart(void);
