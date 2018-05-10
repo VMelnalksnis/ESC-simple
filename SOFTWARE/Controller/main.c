@@ -8,6 +8,7 @@
 #include "Controller.h"
 
 volatile uint8_t current_state = 0;
+volatile uint8_t ovflw_counter = 0;
 
 const uint8_t driver_states_on[] = {	DRIVER_STATE_ON_1, DRIVER_STATE_ON_2,
 										DRIVER_STATE_ON_3, DRIVER_STATE_ON_4,
@@ -26,7 +27,18 @@ volatile uint8_t driver_frequency;
 int main(void)
 {
 	InitIO();
-
+	
+	/*	Initialize Timer0, which is used to control the PWM duty cycle.	*/
+	/*	Disconnect compare outputs, normal mode of operation, pre-scaler of 1.	*/
+	TCCR0A = 0;
+	TCCR0B = (1 << CS01);
+	/*	Enable output compare B, output compare B and overflow interrupt.	*/
+	TIMSK0 = (1 << OCIE0B) | (1 << OCIE0A) | (0 << TOIE0);
+	/*	Timer0 output compare A value; corresponds to PWM period (20kHz).	*/
+	OCR0A = 50;
+	/*	Timer0 output compare B value; corresponds to PWM ON width.	*/
+	OCR0B = 100;
+	
 	/*	Initialize Timer1, which is used to measure the control signal.	*/
 	/*	Disconnect compare outputs, normal mode of operation,
 		enable input capture noise canceler, input capture positive edge,
@@ -36,13 +48,31 @@ int main(void)
 	TCCR1C = 0;
 	/*	Enable interrupt capture interrupt.	*/
 	TIMSK1 = (1 << ICIE1) | (0 << TOIE1);
+	
+	/*	Initialize Timer2, which is used to control commutation frequency.	*/
+	/*	Pre-scaler 1024.	*/
+	TCCR2A = 0;
+	TCCR2B = (1 << CS22) | (1 << CS21) | (1 << CS20);
+	/*	Enable overflow interrupt.	*/
+	TIMSK2 = (1 << TOIE2);
 
 	/*	Enable global interrupts.	*/
 	sei();
 
 	while (1)
 	{
-
+		if (control_width < 16000)
+		{
+			TEST_PORT = 0;
+		} 
+		else if (control_width < 32000)
+		{
+			TEST_PORT = 1;
+		}
+		else
+		{
+			TEST_PORT = (1 << TEST_PIN_2) | (1 << TEST_PIN_1);
+		}
 	}
 }
 
@@ -74,39 +104,11 @@ void InitIO()
 
 	/*	AREF as voltage reference, left adjusted, ADC7 (current).	*/
 	ADMUX = (1 << ADLAR) | (0 << MUX3) | (1 << MUX2) | (1 << MUX1) | (1 << MUX0);
-	/*	ADC disabled, start conversion, enable interrupt, pre-scaler 128.	*/
-	ADCSRA =	(1 << ADEN) | (1 << ADSC) | (0 << ADATE) | (1 << ADIE) |
+	/*	ADC disabled, start conversion, disable interrupt, pre-scaler 128.	*/
+	ADCSRA =	(0 << ADEN) | (1 << ADSC) | (0 << ADATE) | (0 << ADIE) |
 				(1 << ADPS2) | (1 << ADPS1) | (1 << ADPS0);
 	/*	Disable analog comparator multiplexer, free running mode.	*/
 	ADCSRB = 0;
-}
-
-void BlindStart()
-{
-	DRIVER_PORT = driver_states_on[current_state];
-	_delay_ms(200);
-	current_state++;
-	DRIVER_PORT = driver_states_on[current_state];
-	_delay_ms(150);
-	current_state++;
-	DRIVER_PORT = driver_states_on[current_state];
-	_delay_ms(120);
-	current_state++;
-	DRIVER_PORT = driver_states_on[current_state];
-	_delay_ms(100);
-	current_state++;
-	DRIVER_PORT = driver_states_on[current_state];
-	_delay_ms(90);
-	current_state++;
-	DRIVER_PORT = driver_states_on[current_state];
-	_delay_ms(80);
-	current_state = 0;
-	DRIVER_PORT = driver_states_on[current_state];
-	_delay_ms(70);
-	current_state++;
-	DRIVER_PORT = driver_states_on[current_state];
-	_delay_ms(60);
-	current_state++;
 }
 
 /*
@@ -129,8 +131,17 @@ ISR(TIMER1_CAPT_vect)
 	{
 		/*	Falling edge.	*/
 		/*	Save the pulse width.	*/
-		//control_width = temp - control_start;
-		driver_frequency = (temp - control_start - 16000) / 163 + 1;
+		control_width = temp - control_start;
+		if (control_width < CTRL_WIDTH_MIN)
+		{
+			control_width = CTRL_WIDTH_MIN;
+		}
+		else if(control_width > CTRL_WIDTH_MAX)
+		{
+			control_width = CTRL_WIDTH_MAX;
+		}
+		driver_frequency = (control_width - 16000) / 178 + 5;
+		OCR0A = driver_frequency;
 	}
 
 	/*	Save the pulse start time.	*/
@@ -141,6 +152,42 @@ ISR(TIMER1_CAPT_vect)
 	TIFR1 = (1 << ICF1);
 }
 
+ISR(TIMER0_COMPB_vect)
+{
+	/*	New PWM cycle, set driver controls to equal to current state ON.	*/
+	DRIVER_PORT = driver_states_on[current_state];
+	/*	Reset the timer.	*/
+	TCNT0 = 0;
+}
+
+ISR(TIMER0_COMPA_vect)
+{
+	/*	Set driver controls equal to current state OFF.	*/
+	DRIVER_PORT = driver_states_off[current_state];
+}
+
+ISR(TIMER2_OVF_vect)
+{
+	ovflw_counter++;
+	
+	if (ovflw_counter >= 10)
+	{
+		
+	} 
+	else
+	{
+	}
+	
+	if (current_state == 6)
+	{
+		current_state = 0;
+	} 
+	else
+	{
+		current_state++;
+	}
+}
+
 /*
  *	Analog Digital Converter interrupt service routine - executed when the ADC has
  *	finished a conversion. Variable control_start gets zeroed each time TIMER1_CAPT_vect
@@ -148,7 +195,7 @@ ISR(TIMER1_CAPT_vect)
  *	possible to measure control pulse width. TODO - check if it is the same outside of
  *	simulation.
  */
-ISR(ADC_vect)
+/*ISR(ADC_vect)
 {
 
-}
+}*/

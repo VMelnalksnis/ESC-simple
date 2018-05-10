@@ -7,6 +7,8 @@ Project("{54F91283-7BC4-4236-8FF9-10F437C3AD48}") = "Blink", "Blink\Blink.cproj"
 EndProject
 Project("{54F91283-7BC4-4236-8FF9-10F437C3AD48}") = "Controller", "Controller\Controller.cproj", "{A18C5D0E-D51F-4BF3-91D8-7A7BBF3E8A71}"
 EndProject
+Project("{54F91283-7BC4-4236-8FF9-10F437C3AD48}") = "Drivers", "Drivers\Drivers.cproj", "{E937A4BB-14E9-4DE1-9D5B-8619A890C49F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|AVR = Debug|AVR
@@ -21,6 +23,10 @@ Global
 		{A18C5D0E-D51F-4BF3-91D8-7A7BBF3E8A71}.Debug|AVR.Build.0 = Debug|AVR
 		{A18C5D0E-D51F-4BF3-91D8-7A7BBF3E8A71}.Release|AVR.ActiveCfg = Release|AVR
 		{A18C5D0E-D51F-4BF3-91D8-7A7BBF3E8A71}.Release|AVR.Build.0 = Release|AVR
+		{E937A4BB-14E9-4DE1-9D5B-8619A890C49F}.Debug|AVR.ActiveCfg = Debug|AVR
+		{E937A4BB-14E9-4DE1-9D5B-8619A890C49F}.Debug|AVR.Build.0 = Debug|AVR
+		{E937A4BB-14E9-4DE1-9D5B-8619A890C49F}.Release|AVR.ActiveCfg = Release|AVR
+		{E937A4BB-14E9-4DE1-9D5B-8619A890C49F}.Release|AVR.Build.0 = Release|AVR
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

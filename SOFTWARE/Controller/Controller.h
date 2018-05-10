@@ -38,7 +38,6 @@
 
 #include <avr/io.h>
 #include <avr/interrupt.h>
-#include <util/delay.h>
 
 /*	Pins connected to LEDs used for testing and status indication.	*/
 #define TEST_PIN_1		PINC0
@@ -69,12 +68,12 @@
 #define DRIVER_STATE_ON_6	((1 << SD_C) | (1 << PHASE_C) | (1 << SD_B))
 
 /*	DRIVER_PORT states during each commutation state (OFF).	*/
-#define DRIVER_STATE_OFF_1	((1 << SD_A) | (1 << PHASE_A) | (1 << SD_B))
-#define DRIVER_STATE_OFF_2	((1 << SD_A) | (1 << PHASE_A) | (1 << SD_C))
-#define DRIVER_STATE_OFF_3	((1 << SD_B) | (1 << PHASE_B) | (1 << SD_C))
-#define DRIVER_STATE_OFF_4	((1 << SD_B) | (1 << PHASE_B) | (1 << SD_A))
-#define DRIVER_STATE_OFF_5	((1 << SD_C) | (1 << PHASE_C) | (1 << SD_A))
-#define DRIVER_STATE_OFF_6	((1 << SD_C) | (1 << PHASE_C) | (1 << SD_B))
+#define DRIVER_STATE_OFF_1	((1 << SD_A) | (1 << PHASE_A) | (1 << SD_B) | (1 << PHASE_B))
+#define DRIVER_STATE_OFF_2	((1 << SD_A) | (1 << SD_C))
+#define DRIVER_STATE_OFF_3	((1 << SD_B) | (1 << PHASE_B) | (1 << SD_C) | (1 << PHASE_C))
+#define DRIVER_STATE_OFF_4	((1 << SD_B) | (1 << SD_A))
+#define DRIVER_STATE_OFF_5	((1 << SD_C) | (1 << PHASE_C) | (1 << SD_A) | (1 << PHASE_A))
+#define DRIVER_STATE_OFF_6	((1 << SD_C) | (1 << SD_B))
 
 /*	Pin used to detect zero crossing for phase A. PCINT23.	*/
 #define ZC_A_DDR		DDRD
